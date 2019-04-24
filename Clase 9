@@ -1,0 +1,28 @@
+SELECT country.country_id,country.country, COUNT(*) FROM city, country WHERE city.country_id = country.country_id GROUP BY country.country_id;
+
+SELECT co.country, COUNT(*) as total FROM city c, country co 
+WHERE c.country_id = co.country_id GROUP BY co.country_id 
+HAVING COUNT(*) > 10 ORDER BY total DESC
+
+
+SELECT cu.customer_id, cu.first_name, cu.last_name,
+	(SELECT COUNT(*) FROM rental r1 WHERE r1.customer_id = cu.customer_id) AS "Total film", 
+	(SELECT SUM(amount)FROM payment p1 WHERE p1.customer_id = cu.customer_id
+	GROUP BY customer_id) AS "DineroTotal"
+	FROM customer cu ORDER BY DineroTotal DESC
+	
+
+
+
+
+SELECT category.name, AVG(f.`length`) AS "average"
+	FROM film f INNER JOIN film_category
+	USING (film_id) INNER JOIN category USING (category_id)
+	GROUP BY category.category_id HAVING AVG(`length`) > (SELECT AVG(`length`) FROM film)
+	ORDER BY AVG(f.`length`) DESC
+	
+	
+SELECT COUNT(p.amount)
+FROM film f, payment p, rental r, inventory i 
+WHERE f.film_id = i.film_id AND p.rental_id = r.rental_id
+AND p.rental_id = r.rental_id AND i.inventory_id = r.inventory_id GROUP BY f.rating
