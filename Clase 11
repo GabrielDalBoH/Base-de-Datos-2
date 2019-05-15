@@ -1,0 +1,73 @@
+USE sakila;
+
+#Practico 11
+
+#Find all the film titles that are not in the inventory.
+
+SELECT f.title FROM film f WHERE f.film_id NOT IN 
+(SELECT i.film_id FROM inventory i)
+
+#Find all the films that are in the 
+#inventory but were never rented. 
+
+#Show title and inventory_id.
+
+#This exercise is complicated. 
+#hint: use sub-queries in FROM and in 
+#WHERE or use left join and ask if one 
+#of the fields is null
+
+SELECT i.inventory_id FROM inventory i WHERE i.inventory_id NOT IN 
+(SELECT r.inventory_id FROM rental r) AND i.film_id IN 
+(SELECT f.film_id FROM film f)
+
+
+#Generate a report with:
+#customer (first, last) name, store id, film title, 
+#when the film was rented and returned 
+#for each of these customers
+#order by store_id, customer last_name
+
+SELECT c.first_name, c.last_name, s.store_id, f.title 
+FROM store s INNER JOIN inventory i 
+ON s.store_id = s.store_id INNER JOIN rental r 
+ON r.inventory_id = i.inventory_id INNER JOIN 
+customer c ON c.customer_id = r.customer_id 
+INNER JOIN film f ON f.film_id = i.film_id
+WHERE r.rental_date IS NOT NULL AND r.return_date 
+IS NOT NULL ORDER BY s.store_id, c.last_name;
+
+
+#Show sales per store (money of rented films)
+
+#show store's city, country, manager info and 
+#total sales (money)
+#(optional) Use concat to show city and country
+#and manager first and last name
+
+SELECT SUM(p.amount) AS "Total", st.first_name, st.last_name
+FROM payment p, country co, city ci, staff st, customer c, 
+store s, address a WHERE p.customer_id = c.customer_id 
+AND ci.country_id = co.country_id 
+AND st.store_id = s.store_id 
+AND p.staff_id = st.staff_id 
+AND a.address_id = s.address_id 
+AND a.city_id = ci.city_id 
+AND st.staff_id = s.manager_staff_id 
+GROUP BY st.first_name, st.last_name;
+
+
+#Which actor has appeared in the most films?
+
+SELECT * FROM 
+film_actor fc INNER JOIN film f ON fc.film_id = f.film_id 
+INNER JOIN actor a ON fc.actor_id = a.actor_id
+
+SELECT CONCAT_WS("", a.first_name, a.last_name) AS 
+"name", a.actor_id, COUNT(*) AS "times" FROM actor a
+INNER JOIN film_actor fc ON a.actor_id = fc.actor_id
+GROUP BY a.actor_id
+HAVING COUNT(a.actor_id) >= ALL(SELECT COUNT(a2.actor_id)
+FROM actor a2
+INNER JOIN film_actor fa2 ON a2.actor_id = fa2.actor_id
+GROUP BY a2.actor_id);
